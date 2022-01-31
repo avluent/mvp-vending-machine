@@ -9,6 +9,8 @@ users:
 /users/new
 /users/update
 /users/delete
+
+deposits:
 /deposit
 /deposit/reset
 

@@ -13,6 +13,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.jackson.*
 
+import com.josavezaat.vmachine.server.routes.*
+
 import java.io.*
 import java.security.KeyStore
 import kotlin.math.log
@@ -70,6 +72,19 @@ class ApiServer {
                 install(ContentNegotiation) {
                     jackson {
                         enable(SerializationFeature.INDENT_OUTPUT)
+                    }
+                }
+                routing {
+                    route("/") {
+                        get {
+                            call.respondText("Jos Avezaat's Vending Machine!")
+                        }
+                    }
+                    route("/api") {
+                        vendingMachineRoutes()
+                        userRoutes()
+                        productRoutes()
+                        depositRoutes()
                     }
                 }
             }

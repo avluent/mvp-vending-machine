@@ -16,34 +16,33 @@ enum class Coin(value: Double) {
 interface VendingMachine {
 
     // purchases
-    buyProduct()
-    purchases: MutableList<Purchase>
+    fun buyProduct(purchase: Purchase): Receipt
+    val purchases: MutableList<Purchase>
 
     // users
-    listUsers()
-    createUser(user: User)
-    updateUser(userId: String, data: User)
-    removeUser(userId: String)
+    fun listUsers()
+    fun createUser(user: User)
+    fun updateUser(userId: String, data: User)
+    fun removeUser(userId: String)
 
     // deposits
-    depositCoin(userId: String, coin: Coin)
-    settleSellerCompensation(sellerId: String, amount: Double)
-    resetDeposit(userId: String)
+    fun depositCoin(userId: String, coin: Coin)
+    fun settleSellerCompensation(sellerId: String, amount: Double)
+    fun resetDeposit(userId: String)
 
     // products
-    listProducts()
-    createProduct(product: Product)
-    updateProduct(productId: String, data: Product)
-    removeProduct(productId: String)
+    fun listProducts()
+    fun createProduct(product: Product)
+    fun updateProduct(productId: String, data: Product)
+    fun removeProduct(productId: String)
 
 }
 
 interface User {
 
     val id: String
-    var username: String
-    var password: String
-    var deposit: Double
+    var firstName: String
+    var lastName: String
     var role: Role
 
 }
@@ -51,7 +50,7 @@ interface User {
 interface Product {
 
     val id: String
-    val sellerId: String
+    val sellerId: String?
     var name: String
     var amountAvailable: Int
     var cost: Double
@@ -60,10 +59,28 @@ interface Product {
 
 interface Purchase {
 
-    val sellerId: String
-    val buyerId: String
+    val sellerId: String?
+    val buyerId: String?
     val productId: String
-    val productAmount: String
-    val costTotal: String
+    val productAmount: Int
+    val costTotal: Double?
 
+}
+
+interface Receipt {
+
+    val totalSpent: Double
+    val purchasedProduct: String
+    val change: List<Coin>
+
+}
+
+class ApiResponse(
+    val message: String
+) {
+
+    lateinit var value: Any
+    constructor( message: String, value: Any): this(message) {
+        this.value = value
+    }
 }
