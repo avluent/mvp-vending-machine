@@ -10,6 +10,8 @@ repositories {
 val ktor_version: String by project
 val jackson_db_version: String by project
 val jackson_kotlin_version: String by project
+val logger_version: String by project
+val logback_version: String by project
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -23,12 +25,13 @@ dependencies {
     runtimeOnly("org.jetbrains.exposed:exposed-jdbc:0.37.3")
 
     // ktor api
-    implementation("io.ktor:ktor-client-core:$ktor_version")
-    implementation("io.ktor:ktor-client-cio:$ktor_version")
+    runtimeOnly("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio-jvm:$ktor_version")
     implementation("io.ktor:ktor-auth:$ktor_version")
     implementation("io.ktor:ktor-server-core:$ktor_version")
     implementation("io.ktor:ktor-server-sessions:$ktor_version")
-    implementation("io.ktor:ktor-server-netty:$ktor_version") 
+    implementation("io.ktor:ktor-server-netty:$ktor_version")
+    implementation("io.ktor:ktor-network-tls-certificates:$ktor_version")
 
     // json
     implementation("io.ktor:ktor-jackson:$ktor_version")
@@ -36,7 +39,9 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_kotlin_version")
 
     // logging
-    implementation("org.slf4j:slf4j-api:2.0.0-alpha6")
+    implementation("io.github.microutils:kotlin-logging-jvm:$logger_version")
+    implementation("ch.qos.logback:logback-classic:$logback_version")
+
 
 }
 
