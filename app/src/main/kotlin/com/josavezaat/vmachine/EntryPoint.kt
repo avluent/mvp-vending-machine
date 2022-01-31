@@ -7,7 +7,7 @@ import io.ktor.network.tls.certificates.*
 import com.josavezaat.vmachine.server.*
 import mu.KotlinLogging
 
-fun Application.main() {
+fun main() {
 
     val logger = KotlinLogging.logger {}
 
