@@ -33,6 +33,8 @@ class ApiServer {
 
     private val serverEnvironment = applicationEngineEnvironment {
 
+        log = logger
+
         sslConnector(
             loadKeystore(keystoreFilePath, keystorePassword)!!,
             keyAlias,
@@ -40,57 +42,12 @@ class ApiServer {
             {privateKeyPassword.toCharArray()}
         ) {
             port = 8443
-            module {
-                install(CORS) {
-                    method(HttpMethod.Get)
-                    method(HttpMethod.Post)
-                    method(HttpMethod.Options)
-                    method(HttpMethod.Patch)
-                    method(HttpMethod.Delete)
-                    maxAgeInSeconds = 3600
-                    allowHeaders { true }
-                    allowCredentials = true
-                }
-                install(IgnoreTrailingSlash)
-                install(DefaultHeaders) {
-                    header(HttpHeaders.Server, "Avezaat MVP Vending Machine")
-                    header(HttpHeaders.UserAgent, "ktor")
-                    header(HttpHeaders.AccessControlAllowOrigin, "*")
-                }
-                install(ForwardedHeaderSupport)
-                install(Compression) {
-                    gzip {
-                        matchContentType(
-                            ContentType.Text.Any,
-                            ContentType.Application.JavaScript
-                        )
-                    }
-                }
-                install(CallLogging) {
-                    level = Level.INFO
-                }
-                install(ContentNegotiation) {
-                    jackson {
-                        enable(SerializationFeature.INDENT_OUTPUT)
-                    }
-                }
-                routing {
-                    route("/") {
-                        get {
-                            call.respondText("Jos Avezaat's Vending Machine!")
-                        }
-                    }
-                    route("/api") {
-                        vendingMachineRoutes()
-                        userRoutes()
-                        productRoutes()
-                        depositRoutes()
-                    }
-                }
-            }
         }
 
+        module(Application::module)
     }
+
+    val instance = embeddedServer(Netty, serverEnvironment)
 
     private fun loadKeystore(
         keystoreFilePath: String,
@@ -114,6 +71,53 @@ class ApiServer {
         }
 
     }
+}
 
-    val start = embeddedServer(Netty, serverEnvironment).start(wait = true)
+fun Application.module() {
+    install(CORS) {
+        method(HttpMethod.Get)
+        method(HttpMethod.Post)
+        method(HttpMethod.Options)
+        method(HttpMethod.Patch)
+        method(HttpMethod.Delete)
+        maxAgeInSeconds = 3600
+        allowHeaders { true }
+        allowCredentials = true
+    }
+    install(IgnoreTrailingSlash)
+    install(DefaultHeaders) {
+        header(HttpHeaders.Server, "Avezaat MVP Vending Machine")
+        header(HttpHeaders.UserAgent, "ktor")
+        header(HttpHeaders.AccessControlAllowOrigin, "*")
+    }
+    install(ForwardedHeaderSupport)
+    install(Compression) {
+        gzip {
+            matchContentType(
+                ContentType.Text.Any,
+                ContentType.Application.JavaScript
+            )
+        }
+    }
+    install(CallLogging) {
+        level = Level.INFO
+    }
+    install(ContentNegotiation) {
+        jackson {
+            enable(SerializationFeature.INDENT_OUTPUT)
+        }
+    }
+    routing {
+        route("/") {
+            get {
+                call.respondText("Jos Avezaat's Vending Machine!")
+            }
+        }
+        route("/api") {
+            vendingMachineRoutes()
+            userRoutes()
+            productRoutes()
+            depositRoutes()
+        }
+    }
 }

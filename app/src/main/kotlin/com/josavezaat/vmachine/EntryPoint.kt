@@ -2,11 +2,12 @@
 package com.josavezaat.vmachine
 
 import java.io.*
+import io.ktor.application.*
 import io.ktor.network.tls.certificates.*
 import com.josavezaat.vmachine.server.*
 import mu.KotlinLogging
 
-fun main() {
+fun Application.main() {
 
     val logger = KotlinLogging.logger {}
 
@@ -21,7 +22,7 @@ fun main() {
     // start the server safely
     try {
 
-        ApiServer().start
+        ApiServer().instance.start(wait = true)
 
     } catch (e: Exception) {
 

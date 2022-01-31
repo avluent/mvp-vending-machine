@@ -32,6 +32,7 @@ dependencies {
     implementation("io.ktor:ktor-server-sessions:$ktor_version")
     implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("io.ktor:ktor-network-tls-certificates:$ktor_version")
+    testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
 
     // json
     implementation("io.ktor:ktor-jackson:$ktor_version")
