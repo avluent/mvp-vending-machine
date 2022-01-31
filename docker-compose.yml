@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  db:
+    image: postgres
+    restart: "always"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8222:8080

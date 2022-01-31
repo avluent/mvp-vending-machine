@@ -1,0 +1,19 @@
+root: /api/
+
+machine:
+/buy
+/purchases
+
+users:
+/users
+/users/new
+/users/update
+/users/delete
+/deposit
+/deposit/reset
+
+products:
+/products
+/products/create
+/products/update
+/products/delete
