@@ -40,20 +40,33 @@ interface VendingMachine {
 
 interface User {
 
-    val id: String
+    val id: Int
     var firstName: String
     var lastName: String
     var role: Role
 
 }
 
+interface PrivateUserData {
+
+    var username: String
+    var password: String
+    var deposit: Double
+
+}
+
 interface Product {
 
-    val id: String
-    val sellerId: String?
+    val id: Int
     var name: String
     var amountAvailable: Int
     var cost: Double
+
+}
+
+interface PrivateProductData {
+
+    var sellerId: Int
 
 }
 

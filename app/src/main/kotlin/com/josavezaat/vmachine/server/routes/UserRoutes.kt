@@ -7,22 +7,22 @@ import io.ktor.response.*
 
 import com.josavezaat.vmachine.common.*
 
-open class RegisteredUser(
-    override val id: String,
+class RegisteredUser(
+    override val id: Int,
     override var firstName: String,
     override var lastName: String,
     override var role: Role
 ): User
 
 class PrivateUser(
-    override val id: String,
+    override val id: Int,
     override var firstName: String,
-    override var  lastName: String,
+    override var lastName: String,
     override var role: Role,
-    private var username: String,
-    private var password: String,
-    private var deposit: Double
-): RegisteredUser(id, firstName, lastName, role)
+    override var username: String,
+    override var password: String,
+    override var deposit: Double
+): User, PrivateUserData
 
 fun Route.userRoutes() {
 
@@ -35,7 +35,7 @@ fun Route.userRoutes() {
             call.respond<List<RegisteredUser>>(
                 listOf(
                     RegisteredUser(
-                        "user-123",
+                        18,
                         "Jamie",
                         "Rockafeller",
                         Role.BUYER
@@ -50,7 +50,7 @@ fun Route.userRoutes() {
             // mock the newly created user
             call.respond<RegisteredUser>(
                 RegisteredUser(
-                    "user-234", 
+                    29,
                     "New", 
                     "Userino", 
                     Role.SELLER
@@ -64,7 +64,7 @@ fun Route.userRoutes() {
             // mock the updated user
             call.respond<PrivateUser>(
                 PrivateUser(
-                    "user-554",
+                    11,
                     "Updeed",
                     "Usree",
                     Role.BUYER,

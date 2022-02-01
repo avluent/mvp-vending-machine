@@ -7,21 +7,20 @@ import io.ktor.response.*
 
 import com.josavezaat.vmachine.common.*
 
-open class PresentableProduct(
-    override val id: String,
+class PresentableProduct(
+    override val id: Int,
     override var name: String,
     override var amountAvailable: Int,
     override var cost: Double,
-    override val sellerId: String? = null
 ): Product
 
 class FullProduct(
-    override val id: String,
+    override val id: Int,
     override var name: String,
     override var amountAvailable: Int,
     override var cost: Double,
-    override val sellerId: String
-): PresentableProduct(id, name, amountAvailable, cost)
+    override var sellerId: Int
+): Product, PrivateProductData
 
 fun Route.productRoutes() {
 
@@ -33,7 +32,7 @@ fun Route.productRoutes() {
             call.respond<List<PresentableProduct>>(
                 listOf(
                     PresentableProduct(
-                        "prod-123",
+                        22,
                         "Kixx",
                         15,
                         1.50
@@ -49,11 +48,11 @@ fun Route.productRoutes() {
             // mock the newly created product
             call.respond<FullProduct>(
                 FullProduct(
-                    "prod-123",
+                    12,
                     "Kixx",
                     15,
                     1.50,
-                    "sellr-432"
+                    19
                 )
             )
         }
@@ -65,11 +64,11 @@ fun Route.productRoutes() {
             // mock the updated response
             call.respond<FullProduct>(
                 FullProduct(
-                    "prod-559",
+                    83,
                     "Soundy",
                     8,
                     1.20,
-                    "sellr-128"
+                    22
                 )
             )
         }

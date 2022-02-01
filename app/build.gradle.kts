@@ -12,6 +12,8 @@ val jackson_db_version: String by project
 val jackson_kotlin_version: String by project
 val logger_version: String by project
 val logback_version: String by project
+val db_version: String by project
+val pg_version: String by project
 
 dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -21,8 +23,10 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
 
     // db
-    implementation("org.jetbrains.exposed:exposed-core:0.37.3")
-    runtimeOnly("org.jetbrains.exposed:exposed-jdbc:0.37.3")
+    implementation("org.jetbrains.exposed:exposed-core:$db_version")
+    implementation("org.jetbrains.exposed:exposed-dao:$db_version")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$db_version")
+    implementation("org.postgresql:postgresql:$pg_version") 
 
     // ktor api
     runtimeOnly("io.ktor:ktor-client-core:$ktor_version")
