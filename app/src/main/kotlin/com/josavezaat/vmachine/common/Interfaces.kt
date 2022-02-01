@@ -4,13 +4,13 @@ package com.josavezaat.vmachine.common
 interface VendingMachine {
 
     // purchases
-    fun buyProduct(purchase: Purchase): Receipt
+    fun buyProduct(purchase: Purchase): Receipt?
     val purchases: MutableList<Purchase>
 
     // users
     fun listUsers(): List<User>
-    fun createUser(user: User): User
-    fun updateUser(userId: Int, data: User): User
+    fun createUser(user: PrivateUser): User?
+    fun updateUser(userId: Int, data: PrivateUser): User?
     fun removeUser(userId: Int): Int
 
     // deposits
@@ -20,8 +20,8 @@ interface VendingMachine {
 
     // products
     fun listProducts(): List<Product>
-    fun createProduct(product: Product): Product
-    fun updateProduct(productId: Int, data: Product): Product
+    fun createProduct(product: FullProduct): PresentableProduct?
+    fun updateProduct(productId: Int, data: FullProduct): FullProduct?
     fun removeProduct(productId: Int): Int
 
 }
@@ -60,11 +60,12 @@ interface PrivateProductData {
 
 interface Purchase {
 
-    val sellerId: String?
-    val buyerId: String?
-    val productId: String
+    val sellerId: Int
+    val buyerId: Int
+    val productId: Int
     val productAmount: Int
-    val costTotal: Double?
+    val costTotal: Double
+    val amountPayed: Double
 
 }
 

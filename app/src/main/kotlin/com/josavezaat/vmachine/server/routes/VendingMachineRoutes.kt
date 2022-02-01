@@ -7,20 +7,6 @@ import io.ktor.routing.*
 
 import com.josavezaat.vmachine.common.*
 
-class CustomerReceipt(
-    override val totalSpent: Double,
-    override val purchasedProduct: String,
-    override val change: List<Coin>
-): Receipt 
-
-class ProcessedPurchase(
-    override val sellerId: String,
-    override val buyerId: String,
-    override val productId: String,
-    override val productAmount: Int,
-    override val costTotal: Double
-): Purchase 
-
 fun Route.vendingMachineRoutes() {
 
     get("/purchases") {
@@ -28,12 +14,7 @@ fun Route.vendingMachineRoutes() {
         // Processed purchase mock
         call.respond<List<ProcessedPurchase>>(
             listOf<ProcessedPurchase>(
-                ProcessedPurchase(
-                    "Seller-1", 
-                    "Buyer-1",
-                    "Product-1", 
-                    12, 
-                    19.50)
+                ProcessedPurchase(12, 3, 5, 12, 19.50, 20.00)
             )
         )
 

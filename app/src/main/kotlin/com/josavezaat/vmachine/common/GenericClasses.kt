@@ -8,14 +8,14 @@ class ApiResponse(val message: String) {
     }
 }
 
-class RegisteredUser(
+data class RegisteredUser(
     override val id: Int,
     override var firstName: String,
     override var lastName: String,
     override var role: Role
 ): User
 
-class PrivateUser(
+data class PrivateUser(
     override val id: Int,
     override var firstName: String,
     override var lastName: String,
@@ -25,14 +25,14 @@ class PrivateUser(
     override var deposit: Double
 ): User, PrivateUserData
 
-class PresentableProduct(
+data class PresentableProduct(
     override val id: Int,
     override var name: String,
     override var amountAvailable: Int,
     override var cost: Double,
 ): Product
 
-class FullProduct(
+data class FullProduct(
     override val id: Int,
     override var name: String,
     override var amountAvailable: Int,
@@ -40,8 +40,17 @@ class FullProduct(
     override var sellerId: Int
 ): Product, PrivateProductData
 
-class CustomerReceipt(
+data class CustomerReceipt(
     override val totalSpent: Double,
     override val purchasedProduct: String,
     override val change: List<Coin>
 ): Receipt
+
+class ProcessedPurchase(
+    override val sellerId: Int,
+    override val buyerId: Int,
+    override val productId: Int,
+    override val productAmount: Int,
+    override val costTotal: Double,
+    override val amountPayed: Double
+): Purchase 

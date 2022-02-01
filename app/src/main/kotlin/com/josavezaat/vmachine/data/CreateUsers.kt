@@ -17,16 +17,6 @@ object Users: Table("USERS") {
     val deposit: Column<Double> = double("deposit")
 }
 
-class PrivateUser(
-    override val id: Int,
-    override var firstName: String,
-    override var lastName: String,
-    override var role: Role,
-    override var username: String,
-    override var password: String,
-    override var deposit: Double
-): User, PrivateUserData
-
 val mockUsers: List<PrivateUser> = listOf(
     PrivateUser(
         0,
@@ -67,7 +57,7 @@ fun createMockUsers() {
 
         for (user in mockUsers) {
             Users.insert {
-                it[id] = user.id
+                // it[id] = user.id
                 it[firstName] = user.firstName
                 it[lastName] = user.lastName
                 it[role] = user.role.toString()
