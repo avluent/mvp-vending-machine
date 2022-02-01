@@ -7,21 +7,6 @@ import io.ktor.response.*
 
 import com.josavezaat.vmachine.common.*
 
-class PresentableProduct(
-    override val id: Int,
-    override var name: String,
-    override var amountAvailable: Int,
-    override var cost: Double,
-): Product
-
-class FullProduct(
-    override val id: Int,
-    override var name: String,
-    override var amountAvailable: Int,
-    override var cost: Double,
-    override var sellerId: Int
-): Product, PrivateProductData
-
 fun Route.productRoutes() {
 
     route("/products") {

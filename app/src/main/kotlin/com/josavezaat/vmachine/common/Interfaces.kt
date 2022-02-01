@@ -1,18 +1,6 @@
 @file:JvmName("Interfaces")
 package com.josavezaat.vmachine.common
 
-enum class Role {
-    BUYER, SELLER
-}
-
-enum class Coin(value: Double) {
-    FIVECENTS(0.05),
-    TENCENTS(0.10),
-    TWENTYCENTS(0.20),
-    FIFTYCENTS(0.50),
-    HUNDREDCENTS(1.00)
-}
-
 interface VendingMachine {
 
     // purchases
@@ -20,21 +8,21 @@ interface VendingMachine {
     val purchases: MutableList<Purchase>
 
     // users
-    fun listUsers()
-    fun createUser(user: User)
-    fun updateUser(userId: String, data: User)
-    fun removeUser(userId: String)
+    fun listUsers(): List<User>
+    fun createUser(user: User): User
+    fun updateUser(userId: Int, data: User): User
+    fun removeUser(userId: Int): Int
 
     // deposits
-    fun depositCoin(userId: String, coin: Coin)
-    fun settleSellerCompensation(sellerId: String, amount: Double)
-    fun resetDeposit(userId: String)
+    fun depositCoin(userId: Int, coin: Coin): Double
+    fun settleSellerCompensation(sellerId: Int, amount: Double): Double
+    fun resetDeposit(userId: Int): Int
 
     // products
-    fun listProducts()
-    fun createProduct(product: Product)
-    fun updateProduct(productId: String, data: Product)
-    fun removeProduct(productId: String)
+    fun listProducts(): List<Product>
+    fun createProduct(product: Product): Product
+    fun updateProduct(productId: Int, data: Product): Product
+    fun removeProduct(productId: Int): Int
 
 }
 
@@ -86,14 +74,4 @@ interface Receipt {
     val purchasedProduct: String
     val change: List<Coin>
 
-}
-
-class ApiResponse(
-    val message: String
-) {
-
-    lateinit var value: Any
-    constructor( message: String, value: Any): this(message) {
-        this.value = value
-    }
 }

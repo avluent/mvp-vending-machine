@@ -7,23 +7,6 @@ import io.ktor.response.*
 
 import com.josavezaat.vmachine.common.*
 
-class RegisteredUser(
-    override val id: Int,
-    override var firstName: String,
-    override var lastName: String,
-    override var role: Role
-): User
-
-class PrivateUser(
-    override val id: Int,
-    override var firstName: String,
-    override var lastName: String,
-    override var role: Role,
-    override var username: String,
-    override var password: String,
-    override var deposit: Double
-): User, PrivateUserData
-
 fun Route.userRoutes() {
 
     route("/users") {
