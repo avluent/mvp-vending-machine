@@ -3,12 +3,6 @@ package com.josavezaat.vmachine.application
 
 import com.josavezaat.vmachine.common.*
 
-class CustomerReceipt(
-    override val totalSpent: Double,
-    override val purchasedProduct: String,
-    override val change: List<Coin>
-): Receipt
-
 object CandyBarMachine: VendingMachine {
 
     override val purchases = mutableListOf<Purchase>()

@@ -39,3 +39,9 @@ class FullProduct(
     override var cost: Double,
     override var sellerId: Int
 ): Product, PrivateProductData
+
+class CustomerReceipt(
+    override val totalSpent: Double,
+    override val purchasedProduct: String,
+    override val change: List<Coin>
+): Receipt
