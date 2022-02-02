@@ -25,15 +25,6 @@ data class PrivateUser(
     override var deposit: Double
 ): User, PrivateUserData
 
-data class PrivateUserUpdater(
-    var firstName: String?,
-    var lastName: String?,
-    var role: String?,
-    var userName: String?,
-    var password: String?,
-    var deposit: Double?
-)
-
 data class PresentableProduct(
     override val id: Int,
     override var name: String,

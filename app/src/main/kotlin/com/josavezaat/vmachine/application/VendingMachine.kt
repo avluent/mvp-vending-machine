@@ -10,6 +10,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object CandyBarMachine: VendingMachine {
 
@@ -150,8 +154,6 @@ object CandyBarMachine: VendingMachine {
 
         // patch current user with any
         val patchedUser = currentUser.patchWithMap(data)
-        logger.debug("Patched user: ${patchedUser.toString()}")
-
         transaction {
             Users.update({ Users.id eq userId }) {
                 it[firstName] = patchedUser.firstName
@@ -199,8 +201,10 @@ object CandyBarMachine: VendingMachine {
         val newDepositValue = coinValue + depositValue
 
         // update user
-        Users.update({ Users.id eq userId }) {
-            it[deposit] = newDepositValue
+        transaction {
+            Users.update({ Users.id eq userId }) {
+                it[deposit] = newDepositValue
+            }
         }
 
         return newDepositValue
@@ -215,8 +219,10 @@ object CandyBarMachine: VendingMachine {
         val newDepositValue = depositValue + amount
 
         // update user
-        Users.update( { Users.id eq sellerId }) {
-            it[deposit] = newDepositValue
+        transaction {
+            Users.update( { Users.id eq sellerId }) {
+                it[deposit] = newDepositValue
+            }
         }
 
         return newDepositValue
@@ -227,8 +233,10 @@ object CandyBarMachine: VendingMachine {
         DB().connect()
 
         // reset deposit for user to zero
-        return Users.update( { Users.id eq userId }) {
-            it[deposit] = 0.00
+        return transaction {
+            Users.update( { Users.id eq userId }) {
+                it[deposit] = 0.00
+            }
         }
     }
 
@@ -239,14 +247,16 @@ object CandyBarMachine: VendingMachine {
 
         val productList = mutableListOf<PresentableProduct>()
 
-        for (result in Products.selectAll()) {
-            val product = PresentableProduct(
-                result[Products.id],
-                result[Products.name],
-                result[Products.amountAvailable],
-                result[Products.cost]
-            )
-            productList.add(product)
+        transaction {
+            for (result in Products.selectAll()) {
+                val product = PresentableProduct(
+                    result[Products.id],
+                    result[Products.name],
+                    result[Products.amountAvailable],
+                    result[Products.cost]
+                )
+                productList.add(product)
+            }
         }
 
         return productList.toList()
@@ -261,22 +271,26 @@ object CandyBarMachine: VendingMachine {
             return null
 
         // insert product
-        val newProduct: Int = Products.insert {
-            it[name] = product.name
-            it[amountAvailable] = product.amountAvailable
-            it[cost] = product.cost
-            it[sellerId] = product.sellerId
-        } get Products.id
+        val newProduct: Int = transaction {
+                Products.insert {
+                it[name] = product.name
+                it[amountAvailable] = product.amountAvailable
+                it[cost] = product.cost
+                it[sellerId] = product.sellerId
+            } get Products.id
+        }
 
         // check if insertion succeeded
         lateinit var newlyCreatedProduct: PresentableProduct
-        for (result in Products.select { Products.id eq newProduct }) {
-            newlyCreatedProduct = PresentableProduct(
-                result[Products.id],
-                result[Products.name],
-                result[Products.amountAvailable],
-                result[Products.cost]
-            )
+        transaction {
+            for (result in Products.select { Products.id eq newProduct }) {
+                newlyCreatedProduct = PresentableProduct(
+                    result[Products.id],
+                    result[Products.name],
+                    result[Products.amountAvailable],
+                    result[Products.cost]
+                )
+            }
         }
 
         return newlyCreatedProduct
@@ -286,38 +300,60 @@ object CandyBarMachine: VendingMachine {
 
         DB().connect()
 
-        /*
-        // check if product cost is multiples of 5
-        if (!data.cost.decimalIsMultipleOfFive())
-            return null
+        val dataCost: Any? = data["cost"]
+        if (dataCost != null) {
+            if (!(dataCost as Double).decimalIsMultipleOfFive()) {
+                logger.debug("${dataCost as Double} is not divisible by 5")
+                return null
+            }
+            logger.debug("${dataCost as Double} is divisible by 5")
+        }
 
-        // perform update
-        Products.update({ Products.id eq productId }) { 
-            it[name] = data.name
-            it[amountAvailable] = data.amountAvailable
-            it[cost] = data.cost
-            it[sellerId] = data.sellerId
+        // get current product
+        lateinit var currentProduct: FullProduct
+        transaction {
+            for (result in Products.select({ Products.id eq productId })) {
+                currentProduct = FullProduct(
+                    result[Products.id],
+                    result[Products.name],
+                    result[Products.amountAvailable],
+                    result[Products.cost],
+                    result[Products.sellerId]
+                )
+            }
+        }
+
+        // patch product
+        val patchedProduct = currentProduct.patchWithMap(data)
+        transaction {
+            Products.update({ Products.id eq productId }) { 
+                it[name] = patchedProduct.name
+                it[amountAvailable] = patchedProduct.amountAvailable
+                it[cost] = patchedProduct.cost
+                it[sellerId] = patchedProduct.sellerId
+            }
         }
 
         // see if update was successful
         lateinit var updatedProduct: FullProduct
-        for (result in Products.select { Products.id eq productId }) {
-            updatedProduct = FullProduct(
-                result[Products.id],
-                result[Products.name],
-                result[Products.amountAvailable],
-                result[Products.cost],
-                result[Products.sellerId]
-            )
+        transaction {
+            for (result in Products.select { Products.id eq productId }) {
+                updatedProduct = FullProduct(
+                    result[Products.id],
+                    result[Products.name],
+                    result[Products.amountAvailable],
+                    result[Products.cost],
+                    result[Products.sellerId]
+                )
+            }
         }
 
         return updatedProduct
-        */
-        return null
     }
 
     override fun removeProduct(productId: Int): Int {
-        return Products.deleteWhere { Products.id eq productId }
+        return transaction {
+            Products.deleteWhere { Products.id eq productId }
+        }
     }
-
 }

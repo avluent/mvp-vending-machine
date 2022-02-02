@@ -17,15 +17,17 @@ fun Double.splitToInt(): List<Int> {
 }
 
 fun Double.decimalIsMultipleOfFive(): Boolean {
+    val divided: Double = this / 0.05
 
-    val doubleParts = this.splitToInt()
-    val decValue: Int = doubleParts[1]
-
-    // check with modulo if number is correct
-    if (decValue % 5 == 0)
+    if (divided % 1 == 0.0) {
+        logger.debug((divided % 1).toString())
         return true
-    else
+
+    }
+    else {
         return false
+
+    }
 }
 
 fun Double.calculateChangeInCoins(): List<Coin> {

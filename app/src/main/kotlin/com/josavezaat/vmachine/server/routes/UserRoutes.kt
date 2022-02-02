@@ -63,32 +63,31 @@ fun Route.userRoutes() {
             } catch (e: Exception) {
 
                 val message = "There was an error updating the user: ${e}"
+                logger.error(message)
                 call.respond(ApiResponse(message))
             }
         }
 
         delete("/delete/{userId}") {
 
-            val id: String? = call.parameters["userId"]
-
-            // should no id have been provided
-            if (id === null) {
-                val message = "Please insert an id: /delete/{id}"
-                call.respond<ApiResponse>(
-                    ApiResponse(message)
-                )
-            }
-
             try {
-                CandyBarMachine.removeUser(id!!.toInt())
+
+                val id: String? = call.parameters["userId"]
+
+                // should no id have been provided
+                if (id === null)
+                    throw Error("Please insert an id: /delete/{id}")
+
+                CandyBarMachine.removeUser(id.toInt())
 
                 val message = "User with id: ${id} was successfully removed."
                 call.respond<ApiResponse>(ApiResponse(message))
 
             } catch (e: Exception) {
 
-                val message = "Error deleting user ${id}: ${e}"
-                call.respond<ApiResponse>(ApiResponse(message))
+                val message = "Error deleting user: ${e}"
+                logger.error(message)
+                call.respond(ApiResponse(message))
 
             }
         }
