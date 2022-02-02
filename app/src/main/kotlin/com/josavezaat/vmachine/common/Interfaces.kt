@@ -10,7 +10,7 @@ interface VendingMachine {
     // users
     fun listUsers(): List<User>
     fun createUser(user: PrivateUser): User?
-    fun updateUser(userId: Int, data: PrivateUser): User?
+    fun updateUser(userId: Int, data: Map<String, Any>): PrivateUser?
     fun removeUser(userId: Int): Int
 
     // deposits
@@ -21,7 +21,7 @@ interface VendingMachine {
     // products
     fun listProducts(): List<Product>
     fun createProduct(product: FullProduct): PresentableProduct?
-    fun updateProduct(productId: Int, data: FullProduct): FullProduct?
+    fun updateProduct(productId: Int, data: Map<String, Any>): FullProduct?
     fun removeProduct(productId: Int): Int
 
 }

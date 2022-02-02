@@ -6,6 +6,10 @@ import com.josavezaat.vmachine.data.*
 import mu.KotlinLogging
 
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object CandyBarMachine: VendingMachine {
 
@@ -75,15 +79,19 @@ object CandyBarMachine: VendingMachine {
         DB().connect()
         val userList = mutableListOf<RegisteredUser>()
 
-        for (result in Users.selectAll()) {
-            val user = RegisteredUser(
-                id = result[Users.id],
-                firstName = result[Users.firstName],
-                lastName = result[Users.lastName],
-                role = Role.valueOf(result[Users.role])
-            )
-            userList.add(user)
+        transaction {
+            for (result in Users.selectAll()) {
+                val user = RegisteredUser(
+                    id = result[Users.id],
+                    firstName = result[Users.firstName],
+                    lastName = result[Users.lastName],
+                    role = Role.valueOf(result[Users.role])
+                )
+                userList.add(user)
+            }
         }
+
+        logger.info(userList.toString())
 
         // return users
         return userList.toList()
@@ -106,55 +114,78 @@ object CandyBarMachine: VendingMachine {
 
         // verify if user was created
         lateinit var newlyCreatedUser: RegisteredUser
-        for (result in Users.select { Users.id eq newUser }) {
-            newlyCreatedUser = RegisteredUser(
-                result[Users.id],
-                result[Users.firstName],
-                result[Users.lastName],
-                Role.valueOf(result[Users.role])
-            )
+        transaction {
+            for (result in Users.select { Users.id eq newUser }) {
+                newlyCreatedUser = RegisteredUser(
+                    result[Users.id],
+                    result[Users.firstName],
+                    result[Users.lastName],
+                    Role.valueOf(result[Users.role])
+                )
+            }
         }
 
         return newlyCreatedUser
     }
 
-    override fun updateUser(userId: Int, data: PrivateUser): PrivateUser? {
+    override fun updateUser(userId: Int, data: Map<String, Any>): PrivateUser? {
 
         DB().connect()
 
-        // Updating ID is not allowed
-        if (userId != data.id)
-            return null
+        // collect current user
+        lateinit var currentUser: PrivateUser
+        transaction {
+            for (result in Users.select { Users.id eq userId }) {
+                currentUser = PrivateUser(
+                    result[Users.id],
+                    result[Users.firstName],
+                    result[Users.lastName],
+                    Role.valueOf(result[Users.role]),
+                    result[Users.username],
+                    result[Users.password],
+                    result[Users.deposit]
+                )
+            }
+        }
 
-        // update user
-        Users.update({ Users.id eq userId }) {
-            it[firstName] = data.firstName
-            it[lastName] = data.lastName
-            it[role] = data.role.toString()
-            it[username] = data.username
-            it[password] = data.password
-            it[deposit] = data.deposit
+        // patch current user with any
+        val patchedUser = currentUser.patchWithMap(data)
+        logger.debug("Patched user: ${patchedUser.toString()}")
+
+        transaction {
+            Users.update({ Users.id eq userId }) {
+                it[firstName] = patchedUser.firstName
+                it[lastName] = patchedUser.lastName
+                it[role] = patchedUser.role.toString()
+                it[username] = patchedUser.username
+                it[password] = patchedUser.password
+                it[deposit] = patchedUser.deposit
+            }
         }
 
         // see if update was successful
         lateinit var updatedUser: PrivateUser
-        for (result in Users.select { Users.id eq userId }) {
-            updatedUser = PrivateUser(
-                result[Users.id],
-                result[Users.firstName],
-                result[Users.lastName],
-                Role.valueOf(result[Users.role]),
-                result[Users.username],
-                result[Users.password],
-                result[Users.deposit]
-            )
+        transaction {
+            for (result in Users.select { Users.id eq userId }) {
+                updatedUser = PrivateUser(
+                    result[Users.id],
+                    result[Users.firstName],
+                    result[Users.lastName],
+                    Role.valueOf(result[Users.role]),
+                    result[Users.username],
+                    result[Users.password],
+                    result[Users.deposit]
+                )
+            }
         }
 
         return updatedUser
     }
 
     override fun removeUser(userId: Int): Int { 
-        return Users.deleteWhere { Users.id eq userId }
+        return transaction {
+            Users.deleteWhere { Users.id eq userId }
+        }
     }
 
     // Deposit Functions
@@ -251,14 +282,11 @@ object CandyBarMachine: VendingMachine {
         return newlyCreatedProduct
     }
 
-    override fun updateProduct(productId: Int, data: FullProduct): FullProduct? {
+    override fun updateProduct(productId: Int, data: Map<String, Any>): FullProduct? {
 
         DB().connect()
 
-        // if id's don't match
-        if (productId != data.id)
-            return null
-
+        /*
         // check if product cost is multiples of 5
         if (!data.cost.decimalIsMultipleOfFive())
             return null
@@ -284,76 +312,12 @@ object CandyBarMachine: VendingMachine {
         }
 
         return updatedProduct
+        */
+        return null
     }
 
     override fun removeProduct(productId: Int): Int {
         return Products.deleteWhere { Products.id eq productId }
     }
 
-}
-
-val logger = KotlinLogging.logger() {}
-
-fun Double.splitToInt(): List<Int> {
-
-    // convert to string and split
-    val thisAsString = this.toString()
-    val doubleParts = thisAsString.split(".")
-
-    return doubleParts.map { it.toInt() }
-
-}
-
-fun Double.decimalIsMultipleOfFive(): Boolean {
-
-    val doubleParts = this.splitToInt()
-    val decValue: Int = doubleParts[1]
-
-    // check with modulo if number is correct
-    if (decValue % 5 == 0)
-        return true
-    else
-        return false
-}
-
-fun Double.calculateChangeInCoins(): List<Coin> {
-    
-    var amountLeft: Double = this
-
-    val coinList = mutableListOf<Coin>()
-    val doubleParts: List<Int> = this.splitToInt()
-    val intValue: Int = doubleParts[0]
-
-    // add 100ct coins prior to separator
-    repeat(intValue) {
-        coinList.add(Coin.HUNDREDCENTS)
-        amountLeft -= 1.00
-    }
-
-    while (amountLeft > 0.00) {
-        when {
-            amountLeft > 0.50 -> {
-                coinList.add(Coin.FIFTYCENTS)
-                amountLeft -= 0.50
-            }
-            amountLeft > 0.20 -> {
-                coinList.add(Coin.TWENTYCENTS)
-                amountLeft -= 0.20
-            }
-            amountLeft > 0.10 -> {
-                coinList.add(Coin.TENCENTS)
-                amountLeft -= 0.10
-            }
-            amountLeft > 0.05 -> {
-                coinList.add(Coin.FIVECENTS)
-                amountLeft -= 0.05
-            }
-            amountLeft > 1.00 -> logger.info("Still too much. Do nothing.")
-            else -> {
-                logger.error("Unexpected case when handing out change.")
-            }
-        }
-    }
-
-    return coinList.toList()
 }

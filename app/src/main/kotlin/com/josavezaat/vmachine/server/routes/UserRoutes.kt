@@ -3,59 +3,68 @@ package com.josavezaat.vmachine.server.routes
 
 import io.ktor.application.*
 import io.ktor.routing.*
+import io.ktor.request.*
 import io.ktor.response.*
+import mu.KotlinLogging
 
 import com.josavezaat.vmachine.common.*
+import com.josavezaat.vmachine.application.*
 
 fun Route.userRoutes() {
+
+    val logger = KotlinLogging.logger() {}
 
     route("/users") {
 
         get() {
+            try {
+                val userList = CandyBarMachine.listUsers()
+                call.respond<List<RegisteredUser>>(userList)
 
-            // return a list of all registered users
-            // mock for testing
-            call.respond<List<RegisteredUser>>(
-                listOf(
-                    RegisteredUser(
-                        18,
-                        "Jamie",
-                        "Rockafeller",
-                        Role.BUYER
-                    )
-                )
-            )
+            } catch (e: Exception) {
 
+                val message = "User list could not be retrieved: ${e}"
+                logger.error(message)
+                call.respond(ApiResponse(message))
+            }
         }
 
         post("/create") {
+            try {
+                val user = call.receive<PrivateUser>()
+                val createdUser = CandyBarMachine.createUser(user)
 
-            // mock the newly created user
-            call.respond<RegisteredUser>(
-                RegisteredUser(
-                    29,
-                    "New", 
-                    "Userino", 
-                    Role.SELLER
-                )
-            )
+                call.respond<RegisteredUser>(createdUser)
+
+            } catch (e: Exception) {
+
+                val message = "Error creating user: ${e}"
+                logger.error(message)
+                call.respond(ApiResponse(message))
+            }
+            
         }
 
         patch("/update/{userId}") {
+            try {
+                val userId: Int? = call.parameters["userId"]?.toInt()
+                if (userId === null)
+                    throw Error("User ID provided was not correct or missing.")
 
-            // takes in the id of the user to change
-            // mock the updated user
-            call.respond<PrivateUser>(
-                PrivateUser(
-                    11,
-                    "Updeed",
-                    "Usree",
-                    Role.BUYER,
-                    "554@buyer.com",
-                    "IlikeToBuy",
-                    82.53
-                )
-            )
+                // object to patch with
+                val data = call.receive<Map<String, Any>>()
+
+                val updatedUser: PrivateUser? = CandyBarMachine.updateUser(userId, data)
+                if (updatedUser === null)
+                    throw Error("Patch did not return a valid user.")
+
+                call.respond<PrivateUser>(updatedUser)
+
+            } catch (e: Exception) {
+
+                val message = "There was an error updating the user: ${e}"
+                call.respond(ApiResponse(message))
+            }
         }
 
         delete("/delete/{userId}") {
@@ -68,20 +77,22 @@ fun Route.userRoutes() {
                 call.respond<ApiResponse>(
                     ApiResponse(message)
                 )
-
             }
 
-            // mock the removed user
-            val message = "User with id: ${id} was successfully removed."
-            call.respond<ApiResponse>(
-                ApiResponse(message)
-            )
-                
+            try {
+                CandyBarMachine.removeUser(id!!.toInt())
+
+                val message = "User with id: ${id} was successfully removed."
+                call.respond<ApiResponse>(ApiResponse(message))
+
+            } catch (e: Exception) {
+
+                val message = "Error deleting user ${id}: ${e}"
+                call.respond<ApiResponse>(ApiResponse(message))
+
+            }
         }
-
     }
-
-
 }
 
 
