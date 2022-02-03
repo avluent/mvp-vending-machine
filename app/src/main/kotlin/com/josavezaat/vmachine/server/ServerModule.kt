@@ -67,41 +67,30 @@ fun Application.module() {
         basic("mvp-auth") {
             val logger = KotlinLogging.logger() {}
             realm = "Authentication for Jos Avezaat's Candy Machine"
+            skipWhen { call ->
+                call.sessions.get<ClientSession>() != null
+            }
             validate { credentials ->
 
-                var currentSession = this.request.call.sessions.get<ClientSession>()
+                logger.info("Generating new user session")
 
-                // when no session is active
-                if (currentSession == null) {
-
-                    logger.info("Generating new user session")
-
-                    transaction {
-                        for (user in Users.select { Users.userName eq credentials.name }
-                            .andWhere { Users.password eq credentials.password }) {
-                                currentSession = ClientSession(
-                                    UUID.randomUUID().toString(),
-                                    user[Users.id],
-                                    user[Users.firstName],
-                                    user[Users.lastName],
-                                    Role.valueOf(user[Users.role]),
-                                    user[Users.userName]
-                                )
-                            }
-                    }
-
-                    if (currentSession != null) {
-                        this.request.call.sessions.set(currentSession!!)
-                        UserIdPrincipal(currentSession!!.userName)
-                    } else {
-                        null
-                    }
-
-                } else {
-
-                    logger.info("Session will be resumed")
-                    UserIdPrincipal(currentSession!!.userName)
+                var currentSession: ClientSession? = null
+                transaction {
+                    for (user in Users.select { Users.userName eq credentials.name }
+                        .andWhere { Users.password eq credentials.password }) {
+                            currentSession = ClientSession(
+                                UUID.randomUUID().toString(),
+                                user[Users.id],
+                                user[Users.firstName],
+                                user[Users.lastName],
+                                Role.valueOf(user[Users.role]),
+                                user[Users.userName]
+                            )
+                        }
                 }
+
+                this.request.call.sessions.set(currentSession!!)
+                UserIdPrincipal(currentSession!!.userName)
             }
         }
     }
