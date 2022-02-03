@@ -6,59 +6,36 @@ import com.josavezaat.vmachine.data.*
 import mu.KotlinLogging
 
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.*
 
 object CandyBarMachine: VendingMachine {
 
     val logger = KotlinLogging.logger() {}
-    override val purchases = mutableListOf<Purchase>()
+    override val purchases = mutableListOf<ProcessedPurchase>()
 
-    override fun buyProduct(purchase: Purchase): CustomerReceipt? {
+    override fun buyProduct(_purchase: NewPurchase): CustomerReceipt? {
 
         DB().connect()
 
-        // check preconditions
-        val productAmountAvailable: Int = 
-            Products.select { Products.id eq purchase.productId }
-                .single()[Products.amountAvailable]
-
-        val buyersDepositAvailable: Double =
-            Users.select { Users.id eq purchase.buyerId }
-                .single()[Users.deposit]
-
-        if (productAmountAvailable < purchase.productAmount 
-            || buyersDepositAvailable < purchase.costTotal)
+        // calculate cost total and add to ProcessedPurchase
+        val purchase = _purchase.addPurchaseMetadata(1)
+        if (purchase == null)
             return null
 
         // change product amount
-        val newProductAmount = productAmountAvailable - purchase.productAmount
-        Products.update({ Products.id eq purchase.productId }) {
-            it[Products.amountAvailable] = newProductAmount
+        val newProductAmount = purchase.productAmountAvailable - purchase.productAmount
+        transaction {
+            Products.update({ Products.id eq purchase.productId }) {
+                it[Products.amountAvailable] = newProductAmount
+            }
         }
 
-        // withdraw amount from buyer deposit
-        val newBuyersDeposit = buyersDepositAvailable - purchase.costTotal
-        Users.update({ Users.id eq purchase.buyerId }) {
-            it[Users.deposit] = newBuyersDeposit
-        }
+        // settle between buyer and seller
+        purchase.settleTransaction()
+        if (purchase == null)
+            return null
 
-        // add amount to seller's deposit
-        val currentSellersDeposit: Double =
-            Users.select { Users.id eq purchase.sellerId }
-                .single()[Users.deposit]
-        val newSellersDeposit = currentSellersDeposit + purchase.costTotal
-        Users.update({ Users.id eq purchase.sellerId }) {
-            it[Users.deposit] = newSellersDeposit
-        }
-
-        // calculate change array from payed - amount
+        // calculate change array from payed amount
         val paymentSurplus = purchase.amountPayed - purchase.costTotal
         lateinit var change: List<Coin>
         if (paymentSurplus > 0)
@@ -67,8 +44,14 @@ object CandyBarMachine: VendingMachine {
             change = listOf<Coin>()
 
         // return receipt
-        val purchasedProductName = Products.select { Products.id eq purchase.productId }
-            .single()[Products.name]
+        val purchasedProductName = transaction {
+            Products.select { Products.id eq purchase.productId }
+                .single()[Products.name]
+        }
+
+        // add purchase to register
+        val processedPurchase: ProcessedPurchase = purchase
+        this.purchases.add(processedPurchase)
 
         return CustomerReceipt(
             purchase.costTotal,
@@ -270,6 +253,10 @@ object CandyBarMachine: VendingMachine {
         if (!product.cost.decimalIsMultipleOfFive())
             return null
 
+        // check if seller ID is actually a seller
+        if( !product.sellerId.isSeller() )
+            return null
+
         // insert product
         val newProduct: Int = transaction {
                 Products.insert {
@@ -303,10 +290,10 @@ object CandyBarMachine: VendingMachine {
         val dataCost: Any? = data["cost"]
         if (dataCost != null) {
             if (!(dataCost as Double).decimalIsMultipleOfFive()) {
-                logger.debug("${dataCost as Double} is not divisible by 5")
+                logger.debug("${dataCost} is not divisible by 5")
                 return null
             }
-            logger.debug("${dataCost as Double} is divisible by 5")
+            logger.debug("${dataCost} is divisible by 5")
         }
 
         // get current product

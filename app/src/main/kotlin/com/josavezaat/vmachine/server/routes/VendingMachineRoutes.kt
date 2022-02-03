@@ -2,38 +2,40 @@
 package com.josavezaat.vmachine.server.routes
 
 import io.ktor.application.*
+import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
 import com.josavezaat.vmachine.common.*
+import com.josavezaat.vmachine.application.*
+import mu.KotlinLogging
 
 fun Route.vendingMachineRoutes() {
 
+    val logger = KotlinLogging.logger() {}
+
     get("/purchases") {
-
-        // Processed purchase mock
-        call.respond<List<ProcessedPurchase>>(
-            listOf<ProcessedPurchase>(
-                ProcessedPurchase(12, 3, 5, 12, 19.50, 20.00)
-            )
-        )
-
+        val transactionList = CandyBarMachine.purchases.toList()
+        call.respond<List<ProcessedPurchase>>(transactionList)
     }
 
     post("/buy") {
+        try {
 
-        // input must be purchase with only product and amount
-        // add metadata to purchase
+            val purchase = call.receive<NewPurchase>()
+            val receipt = CandyBarMachine.buyProduct(purchase)
 
-        // return receipt mock
-        call.respond<CustomerReceipt>(
-            CustomerReceipt(
-                0.05, 
-                "Silky Way", 
-                listOf(
-                    Coin.FIVECENTS
-                ))
-        )
+            if (receipt == null)
+                throw Error("Receipt was not created. Invalid purchase!")
 
+            call.respond<CustomerReceipt>(receipt)
+
+        } catch (e: Exception) {
+
+            val message = "Error with printing your receipt: ${e}"
+            logger.error(message)
+            call.respond(ApiResponse(message))
+
+        }
     }
 }

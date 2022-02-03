@@ -4,8 +4,8 @@ package com.josavezaat.vmachine.common
 interface VendingMachine {
 
     // purchases
-    fun buyProduct(purchase: Purchase): Receipt?
-    val purchases: MutableList<Purchase>
+    fun buyProduct(_purchase: NewPurchase): Receipt?
+    val purchases: MutableList<ProcessedPurchase>
 
     // users
     fun listUsers(): List<User>
@@ -60,12 +60,19 @@ interface PrivateProductData {
 
 interface Purchase {
 
-    val sellerId: Int
-    val buyerId: Int
     val productId: Int
     val productAmount: Int
-    val costTotal: Double
     val amountPayed: Double
+
+}
+
+interface PurchaseProcessing {
+
+    var sellerId: Int
+    var buyerId: Int
+    var costTotal: Double
+    var productAmountAvailable: Int
+    var buyersDepositAvailable: Double
 
 }
 

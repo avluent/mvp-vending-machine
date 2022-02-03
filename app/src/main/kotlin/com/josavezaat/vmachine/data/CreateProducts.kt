@@ -16,10 +16,10 @@ object Products: Table("PRODUCTS") {
 }
 
 val mockProducts: List<FullProduct> = listOf(
-    FullProduct( 0, "Slix", 5, 1.20, 1),
-    FullProduct( 1, "Pars", 15, 1.00, 1),
-    FullProduct( 2, "Dounty", 8, 0.85, 1),
-    FullProduct( 3, "Silky Stay", 4, 1.15, 1),
+    FullProduct( 1, "Slix", 5, 1.20, 2),
+    FullProduct( 2, "Pars", 15, 1.00, 2),
+    FullProduct( 3, "Dounty", 8, 0.85, 2),
+    FullProduct( 4, "Silky Stay", 4, 1.15, 2),
 )
 
 fun createMockProducts() {

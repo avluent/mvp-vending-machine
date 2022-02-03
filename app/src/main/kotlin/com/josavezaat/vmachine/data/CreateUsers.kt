@@ -19,7 +19,7 @@ object Users: Table("USERS") {
 
 val mockUsers: List<PrivateUser> = listOf(
     PrivateUser(
-        0,
+        1,
         "Joe",
         "Packson",
         Role.BUYER,
@@ -28,23 +28,14 @@ val mockUsers: List<PrivateUser> = listOf(
         0.00
     ),
     PrivateUser(
-        1,
+        2,
         "Marina",
         "Rogan",
         Role.SELLER,
         "marina.roe@on.com",
         "kdjf83",
         2.20
-    ),
-    PrivateUser(
-        2,
-        "Julia",
-        "Marino",
-        Role.BUYER,
-        "marino.so@on.com",
-        "dkljf9234jdklf8",
-        3.00
-    ),
+    )
 )
 
 fun createMockUsers() {

@@ -46,11 +46,19 @@ data class CustomerReceipt(
     override val change: List<Coin>
 ): Receipt
 
-class ProcessedPurchase(
-    override val sellerId: Int,
-    override val buyerId: Int,
+open class NewPurchase(
     override val productId: Int,
     override val productAmount: Int,
-    override val costTotal: Double,
     override val amountPayed: Double
-): Purchase 
+): Purchase
+
+class ProcessedPurchase(
+    override var sellerId: Int,
+    override var buyerId: Int,
+    override val productId: Int,
+    override val productAmount: Int,
+    override var costTotal: Double,
+    override val amountPayed: Double,
+    override var productAmountAvailable: Int,
+    override var buyersDepositAvailable: Double
+): NewPurchase(productId, productAmount, amountPayed), PurchaseProcessing
