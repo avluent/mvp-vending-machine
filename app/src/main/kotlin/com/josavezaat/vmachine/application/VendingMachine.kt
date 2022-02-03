@@ -72,7 +72,8 @@ object CandyBarMachine: VendingMachine {
                     id = result[Users.id],
                     firstName = result[Users.firstName],
                     lastName = result[Users.lastName],
-                    role = Role.valueOf(result[Users.role])
+                    role = Role.valueOf(result[Users.role]),
+                    userName = result[Users.userName]
                 )
                 userList.add(user)
             }
@@ -94,7 +95,7 @@ object CandyBarMachine: VendingMachine {
             it[firstName] = user.firstName
             it[lastName] = user.lastName
             it[role] = user.role.toString()
-            it[username] = user.username
+            it[userName] = user.userName
             it[password] = user.password
             it[deposit] = user.deposit
         } get Users.id
@@ -107,7 +108,8 @@ object CandyBarMachine: VendingMachine {
                     result[Users.id],
                     result[Users.firstName],
                     result[Users.lastName],
-                    Role.valueOf(result[Users.role])
+                    Role.valueOf(result[Users.role]),
+                    result[Users.userName]
                 )
             }
         }
@@ -128,7 +130,7 @@ object CandyBarMachine: VendingMachine {
                     result[Users.firstName],
                     result[Users.lastName],
                     Role.valueOf(result[Users.role]),
-                    result[Users.username],
+                    result[Users.userName],
                     result[Users.password],
                     result[Users.deposit]
                 )
@@ -142,7 +144,7 @@ object CandyBarMachine: VendingMachine {
                 it[firstName] = patchedUser.firstName
                 it[lastName] = patchedUser.lastName
                 it[role] = patchedUser.role.toString()
-                it[username] = patchedUser.username
+                it[userName] = patchedUser.userName
                 it[password] = patchedUser.password
                 it[deposit] = patchedUser.deposit
             }
@@ -157,7 +159,7 @@ object CandyBarMachine: VendingMachine {
                     result[Users.firstName],
                     result[Users.lastName],
                     Role.valueOf(result[Users.role]),
-                    result[Users.username],
+                    result[Users.userName],
                     result[Users.password],
                     result[Users.deposit]
                 )

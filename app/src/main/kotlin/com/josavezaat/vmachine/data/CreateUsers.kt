@@ -12,7 +12,7 @@ object Users: Table("USERS") {
     val firstName: Column<String> = varchar("first_name", 50)
     val lastName: Column<String> = varchar("last_name", 50)
     val role: Column<String> = varchar("role", 50)
-    val username: Column<String> = varchar("username", 50)
+    val userName: Column<String> = varchar("username", 50)
     val password: Column<String> = varchar("password", 50)
     val deposit: Column<Double> = double("deposit")
 }
@@ -52,7 +52,7 @@ fun createMockUsers() {
                 it[firstName] = user.firstName
                 it[lastName] = user.lastName
                 it[role] = user.role.toString()
-                it[username] = user.username
+                it[userName] = user.userName
                 it[password] = user.password
                 it[deposit] = user.deposit
             }

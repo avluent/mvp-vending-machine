@@ -31,13 +31,13 @@ interface User {
     val id: Int
     var firstName: String
     var lastName: String
+    var userName: String
     var role: Role
 
 }
 
 interface PrivateUserData {
 
-    var username: String
     var password: String
     var deposit: Double
 

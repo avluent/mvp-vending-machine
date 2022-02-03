@@ -1,6 +1,15 @@
 @file:JvmName("GenericClasses")
 package com.josavezaat.vmachine.common
 
+data class ClientSession(
+    val sessionId: String,
+    override val id: Int,
+    override var firstName: String,
+    override var lastName: String,
+    override var role: Role,
+    override var userName: String
+): User
+
 class ApiResponse(val message: String) {
     var value: Any? = null
     constructor( message: String, value: Any): this(message) {
@@ -12,7 +21,8 @@ data class RegisteredUser(
     override val id: Int,
     override var firstName: String,
     override var lastName: String,
-    override var role: Role
+    override var role: Role,
+    override var userName: String
 ): User
 
 data class PrivateUser(
@@ -20,9 +30,9 @@ data class PrivateUser(
     override var firstName: String,
     override var lastName: String,
     override var role: Role,
-    override var username: String,
+    override var userName: String,
     override var password: String,
-    override var deposit: Double
+    override var deposit: Double = 0.00
 ): User, PrivateUserData
 
 data class PresentableProduct(

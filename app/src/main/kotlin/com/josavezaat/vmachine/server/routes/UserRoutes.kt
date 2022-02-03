@@ -5,6 +5,7 @@ import io.ktor.application.*
 import io.ktor.routing.*
 import io.ktor.request.*
 import io.ktor.response.*
+import io.ktor.auth.*
 import mu.KotlinLogging
 
 import com.josavezaat.vmachine.common.*
@@ -16,19 +17,7 @@ fun Route.userRoutes() {
 
     route("/users") {
 
-        get() {
-            try {
-                val userList = CandyBarMachine.listUsers()
-                call.respond<List<RegisteredUser>>(userList)
-
-            } catch (e: Exception) {
-
-                val message = "User list could not be retrieved: ${e}"
-                logger.error(message)
-                call.respond(ApiResponse(message))
-            }
-        }
-
+        // creating users is not authenticated
         post("/create") {
             try {
                 val user = call.receive<PrivateUser>()
@@ -45,50 +34,66 @@ fun Route.userRoutes() {
             
         }
 
-        patch("/update/{userId}") {
-            try {
-                val userId: Int? = call.parameters["userId"]?.toInt()
-                if (userId === null)
-                    throw Error("User ID provided was not correct or missing.")
+        authenticate("mvp-auth") {
 
-                // object to patch with
-                val data = call.receive<Map<String, Any>>()
+            get() {
+                try {
+                    val userList = CandyBarMachine.listUsers()
+                    call.respond<List<RegisteredUser>>(userList)
 
-                val updatedUser: PrivateUser? = CandyBarMachine.updateUser(userId, data)
-                if (updatedUser === null)
-                    throw Error("Patch did not return a valid user.")
+                } catch (e: Exception) {
 
-                call.respond<PrivateUser>(updatedUser)
-
-            } catch (e: Exception) {
-
-                val message = "There was an error updating the user: ${e}"
-                logger.error(message)
-                call.respond(ApiResponse(message))
+                    val message = "User list could not be retrieved: ${e}"
+                    logger.error(message)
+                    call.respond(ApiResponse(message))
+                }
             }
-        }
 
-        delete("/delete/{userId}") {
+            patch("/update/{userId}") {
+                try {
+                    val userId: Int? = call.parameters["userId"]?.toInt()
+                    if (userId === null)
+                        throw Error("User ID provided was not correct or missing.")
 
-            try {
+                    // object to patch with
+                    val data = call.receive<Map<String, Any>>()
 
-                val id: String? = call.parameters["userId"]
+                    val updatedUser: PrivateUser? = CandyBarMachine.updateUser(userId, data)
+                    if (updatedUser === null)
+                        throw Error("Patch did not return a valid user.")
 
-                // should no id have been provided
-                if (id === null)
-                    throw Error("Please insert an id: /delete/{id}")
+                    call.respond<PrivateUser>(updatedUser)
 
-                CandyBarMachine.removeUser(id.toInt())
+                } catch (e: Exception) {
 
-                val message = "User with id: ${id} was successfully removed."
-                call.respond<ApiResponse>(ApiResponse(message))
+                    val message = "There was an error updating the user: ${e}"
+                    logger.error(message)
+                    call.respond(ApiResponse(message))
+                }
+            }
 
-            } catch (e: Exception) {
+            delete("/delete/{userId}") {
 
-                val message = "Error deleting user: ${e}"
-                logger.error(message)
-                call.respond(ApiResponse(message))
+                try {
 
+                    val id: String? = call.parameters["userId"]
+
+                    // should no id have been provided
+                    if (id === null)
+                        throw Error("Please insert an id: /delete/{id}")
+
+                    CandyBarMachine.removeUser(id.toInt())
+
+                    val message = "User with id: ${id} was successfully removed."
+                    call.respond<ApiResponse>(ApiResponse(message))
+
+                } catch (e: Exception) {
+
+                    val message = "Error deleting user: ${e}"
+                    logger.error(message)
+                    call.respond(ApiResponse(message))
+
+                }
             }
         }
     }

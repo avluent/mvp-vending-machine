@@ -20,7 +20,7 @@ fun PrivateUser.patchWithMap(patch: Map<String, Any>): PrivateUser {
                 "firstName" -> this.firstName = prop.value.toString()
                 "lastName" -> this.lastName = prop.value.toString()
                 "role" -> this.role = Role.valueOf(prop.value.toString())
-                "username" -> this.username = prop.value.toString()
+                "userName" -> this.userName = prop.value.toString()
                 "password" -> this.password = prop.value.toString()
                 "deposit" -> this.deposit = prop.value.toString().toDouble()
             }

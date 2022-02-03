@@ -11,10 +11,17 @@ import io.ktor.sessions.*
 import io.ktor.jackson.*
 
 import com.josavezaat.vmachine.server.routes.*
+import com.josavezaat.vmachine.common.*
+import com.josavezaat.vmachine.data.*
+
 import com.fasterxml.jackson.databind.SerializationFeature
 import mu.KotlinLogging
 import org.slf4j.event.*
+import java.util.UUID
+import java.io.File
 
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.transactions.*
 
 fun Application.module() {
     install(CORS) {
@@ -28,12 +35,12 @@ fun Application.module() {
         allowCredentials = true
     }
     install(IgnoreTrailingSlash)
+    install(ForwardedHeaderSupport)
     install(DefaultHeaders) {
         header(HttpHeaders.Server, "Avezaat MVP Vending Machine")
         header(HttpHeaders.UserAgent, "ktor")
         header(HttpHeaders.AccessControlAllowOrigin, "*")
     }
-    install(ForwardedHeaderSupport)
     install(Compression) {
         gzip {
             matchContentType(
@@ -50,10 +57,58 @@ fun Application.module() {
             enable(SerializationFeature.INDENT_OUTPUT)
         }
     }
+    install(Sessions) {
+        cookie<ClientSession>(
+            "mvp-session",
+            directorySessionStorage(File(".session-data"), cached = true),
+        )
+    }
+    install(Authentication) {
+        basic("mvp-auth") {
+            val logger = KotlinLogging.logger() {}
+            realm = "Authentication for Jos Avezaat's Candy Machine"
+            validate { credentials ->
+
+                var currentSession = this.request.call.sessions.get<ClientSession>()
+
+                // when no session is active
+                if (currentSession == null) {
+
+                    logger.info("Generating new user session")
+
+                    transaction {
+                        for (user in Users.select { Users.userName eq credentials.name }
+                            .andWhere { Users.password eq credentials.password }) {
+                                currentSession = ClientSession(
+                                    UUID.randomUUID().toString(),
+                                    user[Users.id],
+                                    user[Users.firstName],
+                                    user[Users.lastName],
+                                    Role.valueOf(user[Users.role]),
+                                    user[Users.userName]
+                                )
+                            }
+                    }
+
+                    if (currentSession != null)
+                        UserIdPrincipal(currentSession!!.sessionId)
+                    else
+                        null
+
+                } else {
+
+                    logger.info("Session will be resumed")
+                    UserIdPrincipal(currentSession!!.sessionId)
+                }
+            }
+        }
+    }
     routing {
-        route("/") {
-            get {
-                call.respondText("Jos Avezaat's Vending Machine!")
+        authenticate("mvp-auth") {
+            route("/") {
+                get {
+                    call.respondText("Jos Avezaat's Vending Machine!")
+                }
             }
         }
         route("/api") {
