@@ -90,15 +90,17 @@ fun Application.module() {
                             }
                     }
 
-                    if (currentSession != null)
-                        UserIdPrincipal(currentSession!!.sessionId)
-                    else
+                    if (currentSession != null) {
+                        this.request.call.sessions.set(currentSession!!)
+                        UserIdPrincipal(currentSession!!.userName)
+                    } else {
                         null
+                    }
 
                 } else {
 
                     logger.info("Session will be resumed")
-                    UserIdPrincipal(currentSession!!.sessionId)
+                    UserIdPrincipal(currentSession!!.userName)
                 }
             }
         }
@@ -108,6 +110,10 @@ fun Application.module() {
             route("/") {
                 get {
                     call.respondText("Jos Avezaat's Vending Machine!")
+                }
+                get("/logout") {
+                    call.sessions.clear<ClientSession>()
+                    call.respondRedirect("/")
                 }
             }
         }

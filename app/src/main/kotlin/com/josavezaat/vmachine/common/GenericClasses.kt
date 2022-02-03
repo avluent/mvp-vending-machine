@@ -17,6 +17,8 @@ class ApiResponse(val message: String) {
     }
 }
 
+data class CoinDeposit(val coin: Coin)
+
 data class RegisteredUser(
     override val id: Int,
     override var firstName: String,

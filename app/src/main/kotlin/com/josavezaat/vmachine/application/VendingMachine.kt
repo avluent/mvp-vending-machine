@@ -182,7 +182,9 @@ object CandyBarMachine: VendingMachine {
 
         // collect coin and deposit value & combine
         val coinValue: Double = coin.getValue()
-        val depositValue = Users.select { Users.id eq userId }.single()[Users.deposit]
+        val depositValue = transaction {
+            Users.select { Users.id eq userId }.single()[Users.deposit]
+        }
         val newDepositValue = coinValue + depositValue
 
         // update user
