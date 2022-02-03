@@ -74,19 +74,36 @@ fun Application.module() {
 
                 logger.info("Generating new user session")
 
+                /*
+                // When testing
+                if (this.request.headers.get("Testing") != "") {
+                    this.request.call.sessions.set(
+                        ClientSession(
+                            "test",
+                            2,
+                            "Test",
+                            "Bot",
+                            Role.SELLER,
+                            "bot@seller"
+                        )
+                    )
+                    UserIdPrincipal("testBot")
+                } */
+
                 var currentSession: ClientSession? = null
                 transaction {
-                    for (user in Users.select { Users.userName eq credentials.name }
-                        .andWhere { Users.password eq credentials.password }) {
-                            currentSession = ClientSession(
-                                UUID.randomUUID().toString(),
-                                user[Users.id],
-                                user[Users.firstName],
-                                user[Users.lastName],
-                                Role.valueOf(user[Users.role]),
-                                user[Users.userName]
-                            )
-                        }
+                    Users.select { Users.userName eq credentials.name }
+                        .andWhere { Users.password eq credentials.password }
+                            .forEach { user ->
+                                currentSession = ClientSession(
+                                    UUID.randomUUID().toString(),
+                                    user[Users.id],
+                                    user[Users.firstName],
+                                    user[Users.lastName],
+                                    Role.valueOf(user[Users.role]),
+                                    user[Users.userName]
+                                )
+                            }
                 }
 
                 this.request.call.sessions.set(currentSession!!)
