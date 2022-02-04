@@ -8,7 +8,7 @@ val prodAddress = "jdbc:postgresql://db"
 val devAddress = "jdbc:postgresql://localhost:5432"
 
 class DB(
-    val address: String = devAddress,
+    val address: String = prodAddress,
     val database: String = "mvp",
     val driver: String = "org.postgresql.Driver",
     val user: String = "postgres",

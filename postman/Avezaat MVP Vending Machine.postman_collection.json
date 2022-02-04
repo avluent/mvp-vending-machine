@@ -78,6 +78,15 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Rambo\",\n    \"lastName\": \"Klein\",\n    \"role\": \"SELLER\",\n    \"userName\": \"r.k@mvp.co\",\n    \"password\": \"myKnife\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "https://localhost:8443/api/users/create",
 							"protocol": "https",
@@ -99,8 +108,17 @@
 					"request": {
 						"method": "PATCH",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"firstName\": \"Jimmy\",\n    \"deposit\": 14.20\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "https://localhost:8443/api/users/update/user-123",
+							"raw": "https://localhost:8443/api/users/update/1",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -110,7 +128,14 @@
 								"api",
 								"users",
 								"update",
-								"user-123"
+								"1"
+							],
+							"query": [
+								{
+									"key": "firstName",
+									"value": "Jimmy",
+									"disabled": true
+								}
 							]
 						}
 					},
@@ -122,7 +147,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:8443/api/users/delete/user-123",
+							"raw": "https://localhost:8443/api/users/delete/1",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -132,7 +157,7 @@
 								"api",
 								"users",
 								"delete",
-								"user-123"
+								"1"
 							]
 						}
 					},
@@ -144,10 +169,19 @@
 			"name": "Deposits",
 			"item": [
 				{
-					"name": "List User's Deposits",
+					"name": "Deposit to your account",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"coin\": \"FIFTYCENTS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "https://localhost:8443/api/deposit",
 							"protocol": "https",
@@ -192,7 +226,19 @@
 					"name": "List Products",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "https://localhost:8443/api/products",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "8443",
+							"path": [
+								"api",
+								"products"
+							]
+						}
 					},
 					"response": []
 				},
@@ -201,6 +247,15 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Honey Bunny\",\n    \"amountAvailable\": 40,\n    \"cost\": 1.80,\n    \"sellerId\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
 							"raw": "https://localhost:8443/api/products/create",
 							"protocol": "https",
@@ -222,8 +277,17 @@
 					"request": {
 						"method": "PATCH",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Sunny Dream\",\n    \"amountAvailable\": 4,\n    \"cost\": 2.25\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "https://localhost:8443/api/products/update/prod-135",
+							"raw": "https://localhost:8443/api/products/update/2",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -233,7 +297,7 @@
 								"api",
 								"products",
 								"update",
-								"prod-135"
+								"2"
 							]
 						}
 					},
@@ -245,7 +309,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "https://localhost:8443/api/products/delete/prod-135",
+							"raw": "https://localhost:8443/api/products/delete/1",
 							"protocol": "https",
 							"host": [
 								"localhost"
@@ -255,13 +319,48 @@
 								"api",
 								"products",
 								"delete",
-								"prod-135"
+								"1"
 							]
 						}
 					},
 					"response": []
 				}
 			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "jlksjdfs98734",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "joe.packs@on.com",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }

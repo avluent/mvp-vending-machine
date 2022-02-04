@@ -6,9 +6,23 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-
+      - POSTGRES_DB=mvp
   adminer:
     image: adminer
+    depends_on:
+      - "db"
     restart: always
     ports:
       - 8222:8080
+  app:
+    build: .
+    depends_on:
+      - db
+    ports:
+      - 8443:8443
+    volumes:
+      - build:/home/gradle/mvp/app/build
+      - gradle-deps:/home/gradle/.gradle
+volumes:
+  build:
+  gradle-deps:
