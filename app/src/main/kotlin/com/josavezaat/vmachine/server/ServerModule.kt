@@ -74,22 +74,6 @@ fun Application.module() {
 
                 logger.info("Generating new user session")
 
-                /*
-                // When testing
-                if (this.request.headers.get("Testing") != "") {
-                    this.request.call.sessions.set(
-                        ClientSession(
-                            "test",
-                            2,
-                            "Test",
-                            "Bot",
-                            Role.SELLER,
-                            "bot@seller"
-                        )
-                    )
-                    UserIdPrincipal("testBot")
-                } */
-
                 var currentSession: ClientSession? = null
                 transaction {
                     Users.select { Users.userName eq credentials.name }
