@@ -6,9 +6,9 @@ This vending machine is great! It contains loads of digital candy for you to con
 
 ## To get it running
 You will need [Docker](https://docs.docker.com/get-docker/) and [docker-compose](https://docs.docker.com/compose/install/) for the composition to work. Having installed those, you simply type the following command:
-...
+```
 docker-compose up -d
-...
+```
 This will boot up a containerized Postgres Database (including a small DB admin tool in case you need it) and the app itself. 
 
 ### Using and Testing
