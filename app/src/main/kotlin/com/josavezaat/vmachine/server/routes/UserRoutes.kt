@@ -6,6 +6,7 @@ import io.ktor.routing.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.auth.*
+import io.ktor.http.HttpStatusCode
 import mu.KotlinLogging
 
 import com.josavezaat.vmachine.common.*
@@ -23,7 +24,15 @@ fun Route.userRoutes() {
                 val user = call.receive<PrivateUser>()
                 val createdUser = CandyBarMachine.createUser(user)
 
-                call.respond<RegisteredUser>(createdUser)
+                if (createdUser == null) {
+                    call.response.status(HttpStatusCode.BadRequest)
+                    call.respond(ApiResponse(
+                        "Username already exists"
+                    ))
+                } else {
+
+                    call.respond<RegisteredUser>(createdUser)
+                }
 
             } catch (e: Exception) {
 

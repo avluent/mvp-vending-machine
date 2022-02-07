@@ -85,20 +85,31 @@ object CandyBarMachine: VendingMachine {
         return userList.toList()
     }
 
-    override fun createUser(user: PrivateUser): RegisteredUser { 
+    override fun createUser(user: PrivateUser): RegisteredUser? { 
 
         DB().connect()
 
+        // check if username already exists
+        val userNameFree = transaction {
+            Users.select { Users.userName eq user.userName }
+                .singleOrNull()
+        }
+
+        if (userNameFree !== null) 
+            return null
+
         // create new user
-        val newUser: Int = Users.insert {
-            it[id] = user.id
-            it[firstName] = user.firstName
-            it[lastName] = user.lastName
-            it[role] = user.role.toString()
-            it[userName] = user.userName
-            it[password] = user.password
-            it[deposit] = user.deposit
-        } get Users.id
+        val newUser = transaction {
+            Users.insert {
+                //i t[id] = user.id
+                it[firstName] = user.firstName
+                it[lastName] = user.lastName
+                it[role] = user.role.toString()
+                it[userName] = user.userName
+                it[password] = user.password
+                it[deposit] = 0.00
+            } get Users.id
+        }
 
         // verify if user was created
         lateinit var newlyCreatedUser: RegisteredUser
